@@ -56,10 +56,10 @@ final class RacesViewModel {
             // Add unique new races to our collection
             objects.append(contentsOf: uniqueNewRaces)
             // Clean up expired races
-            cleanupExpiredRaces()
+            cleanupExpiredRacesIfNeeded()
             updateDisplayedRaces()
         } catch {
-            errorString = "Error fetching races: \n\(error.localizedDescription)"
+            errorString = "errorMessage".localized(with: error.localizedDescription)
         }
     }
     
@@ -74,8 +74,7 @@ final class RacesViewModel {
     
     private func updateDisplayedRaces() {
         let currentTime = Date().timeIntervalSince1970
-        // Clean up expired races past started 60s
-        cleanupExpiredRaces()
+        cleanupExpiredRacesIfNeeded()
         // Get races that haven't passed the 60-second cutoff
         let availableRaces = objects.filter { race in
             let cutoffTime = TimeInterval(race.raceStart + Constants.racesStartBuffer)
@@ -104,8 +103,9 @@ final class RacesViewModel {
         checkAndFetchMoreRacesIfNeeded(availableRaces: availableRaces)
     }
     
-    private func cleanupExpiredRaces() {
+    private func cleanupExpiredRacesIfNeeded() {
         let currentTime = Date().timeIntervalSince1970
+        // Clean up expired races past started 60s
         objects.removeAll { race in
             let expirationTime = TimeInterval(race.raceStart + Constants.racesStartBuffer)
             return currentTime > expirationTime
@@ -122,9 +122,9 @@ final class RacesViewModel {
     
     private func checkAndFetchMoreRacesIfNeeded(availableRaces: [RaceSummaryModel]) {
         let currentTime = Date().timeIntervalSince1970
-        // Calculate upcoming races (not started yet)
+        // Check upcoming races (not started yet)
         let upcomingRaces = availableRaces.filter { currentTime < TimeInterval($0.raceStart) }
-        // Calculate upcoming races that match current filter
+        // Check upcoming races that match current filter
         let filteredUpcomingRaces = applyCategoryFilter(races: upcomingRaces)
         // If fewer than 5 races or fewer than 50 upcoming races, get more (in order to make sure we have enough filtered categories
         if filteredUpcomingRaces.count < 5 || upcomingRaces.count < 50 {
@@ -135,3 +135,14 @@ final class RacesViewModel {
     }
 }
 
+
+extension String {
+    public var localized: String {
+        localized(with: [])
+    }
+    
+    public func localized(with arguments: any CVarArg...) -> String {
+        let format = NSLocalizedString(self, comment: "")
+        return .localizedStringWithFormat(format, arguments)
+    }
+}

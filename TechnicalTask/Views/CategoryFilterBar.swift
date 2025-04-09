@@ -33,8 +33,8 @@ struct CategoryFilterBar: View {
         }
         .padding(.vertical, 8)
     }
-    private func getTitleString(_ race: RaceCategory) -> String {
-        sizeCategory <= .accessibilityLarge ? race.displayName : race.imageName
+    private func getTitleString(_ category: RaceCategory) -> String {
+        sizeCategory <= .accessibilityLarge ? category.displayName : category.imageName
     }
 }
 struct FilterButton: View {
@@ -59,7 +59,7 @@ struct FilterButton: View {
     @ViewBuilder
     func textOrImage(_ title: String) -> some View {
         if sizeCategory <= .accessibilityLarge {
-            Text(title)
+            Text("categoryDisplayName".localized(with: title))
                 .font(.subheadline)
         } else {
             Image(systemName: title)

@@ -21,10 +21,10 @@ struct MainRaceCard: View {
         HStack {
             if sizeCategory <= .accessibilityLarge {
                 Image(systemName: model.category.imageName)
-                Text(model.raceNameDisplay)
+                Text("raceNameDisplay".localized(with: model.raceNameDisplay))
             }
             else {
-                Text(model.meetingName)
+                Text("meetingName".localized(with: model.meetingName))
             }
             Spacer()
             RaceTimerView(timerService: timerService, raceStartTimestamp: TimeInterval(model.raceStart))

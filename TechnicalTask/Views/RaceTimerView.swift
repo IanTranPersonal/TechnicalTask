@@ -23,7 +23,7 @@ struct RaceTimerView: View {
     
     private var formattedTimeRemaining: String {
         if timeRemaining <= -59 {
-            return "Underway"
+            return "raceStarted".localized
         }
         let minutes = Int(timeRemaining) / Constants.racesStartBuffer
         let seconds = Int(timeRemaining) % Constants.racesStartBuffer

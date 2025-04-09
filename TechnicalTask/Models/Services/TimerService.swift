@@ -18,7 +18,6 @@ class TimerService {
     private var timer: Timer?
     
     init() {
-        // Update every second
         timer = Timer.scheduledTimer(
             withTimeInterval: 1,
             repeats: true
@@ -31,7 +30,7 @@ class TimerService {
         timer?.invalidate()
     }
     
-    // Helper method to calculate time remaining for a race
+    //MARK: Helper
     func timeRemaining(for timestamp: Int) -> TimeInterval {
         let targetDate = Date(timeIntervalSince1970: TimeInterval(timestamp))
         return targetDate.timeIntervalSince(currentTime)
