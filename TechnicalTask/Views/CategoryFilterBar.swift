@@ -13,26 +13,26 @@ struct CategoryFilterBar: View {
     var viewModel: RacesViewModel
     
     var body: some View {
-            HStack(alignment: .center, spacing: 10) {
-                ForEach(RaceCategory.allCases, id: \.self) { category in
-                    FilterButton(
-                        title: getTextString(category),
-                        isSelected: viewModel.selectedCategory.contains(category),
-                        action: {
-                            if viewModel.selectedCategory.contains(category) {
-                                viewModel.selectedCategory.removeAll(where: {$0 == category})
-                            } else {
-                                viewModel.selectedCategory.append(category)
-                            }
-                            
+        HStack(alignment: .center, spacing: 10) {
+            ForEach(RaceCategory.allCases, id: \.self) { category in
+                FilterButton(
+                    title: getTitleString(category),
+                    isSelected: viewModel.selectedCategory.contains(category),
+                    action: {
+                        if viewModel.selectedCategory.contains(category) {
+                            viewModel.selectedCategory.removeAll(where: {$0 == category})
+                        } else {
+                            viewModel.selectedCategory.append(category)
                         }
-                    )
-                }
+                        
+                    }
+                )
+            }
         }
         .padding(.vertical, 8)
     }
-    private func getTextString(_ race: RaceCategory) -> String {
-        sizeCategory <= .accessibilityExtraLarge ? race.displayName : race.imageName
+    private func getTitleString(_ race: RaceCategory) -> String {
+        sizeCategory <= .accessibilityLarge ? race.displayName : race.imageName
     }
 }
 struct FilterButton: View {
@@ -56,7 +56,7 @@ struct FilterButton: View {
     
     @ViewBuilder
     func textOrImage(_ title: String) -> some View {
-        if sizeCategory <= .accessibilityExtraExtraLarge {
+        if sizeCategory <= .accessibilityLarge {
             Text(title)
                 .font(.subheadline)
         } else {

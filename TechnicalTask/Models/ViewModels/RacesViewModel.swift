@@ -65,7 +65,6 @@ final class RacesViewModel {
     
     // MARK: - Private Methods
     private func setupRaceChecking() {
-        // Use Timer directly instead of trying to observe currentTime
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
@@ -127,7 +126,7 @@ final class RacesViewModel {
         let upcomingRaces = availableRaces.filter { currentTime < TimeInterval($0.raceStart) }
         // Calculate upcoming races that match current filter
         let filteredUpcomingRaces = applyCategoryFilter(races: upcomingRaces)
-        // If fewer than 5 races or fewer than 10 upcoming races, get more
+        // If fewer than 5 races or fewer than 50 upcoming races, get more (in order to make sure we have enough filtered categories
         if filteredUpcomingRaces.count < 5 || upcomingRaces.count < 50 {
             Task {
                 try await grabData()

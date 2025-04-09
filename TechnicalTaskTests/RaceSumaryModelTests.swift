@@ -15,11 +15,19 @@ struct RaceSummaryModelTests {
     
     @Test("Test Race Name Display")
     func testRaceNameDisplay() {
+        var testRace = dummyRace
         #expect(dummyRace.raceNameDisplay == "Dummy Meeting R1")
     }
     
-    @Test("Test Race Type Icon")
-    func testRaceTypeIcon() {
-        #expect(dummyRace.raceIconName == "car")
+    // MARK: - Race Category Test
+    @Test("Test Race Category Image")
+    func testCategoryImageName() {
+        var category = dummyRace.category
+        #expect(category.imageName == "car")
+        category = .harness
+        #expect(category.imageName == "figure.seated.seatbelt")
+        category = .greyhound
+        #expect(category.imageName == "dog")
     }
+
 }

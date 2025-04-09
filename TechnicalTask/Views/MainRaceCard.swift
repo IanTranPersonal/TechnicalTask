@@ -19,7 +19,7 @@ struct MainRaceCard: View {
     
     var body: some View {
         HStack {
-            if sizeCategory <= .accessibilityExtraExtraLarge {
+            if sizeCategory <= .accessibilityLarge {
                 Image(systemName: model.category.imageName)
                 Text(model.raceNameDisplay)
             }
