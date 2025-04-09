@@ -79,7 +79,7 @@ final class RacesViewModel {
         cleanupExpiredRaces()
         // Get races that haven't passed the 60-second cutoff
         let availableRaces = objects.filter { race in
-            let cutoffTime = TimeInterval(race.raceStart) + 60
+            let cutoffTime = TimeInterval(race.raceStart + Constants.racesStartBuffer)
             return currentTime <= cutoffTime
         }
         // Apply category filter if selected
@@ -90,7 +90,7 @@ final class RacesViewModel {
         var finalRacesToShow: [RaceSummaryModel] {
             var startedRaces = sortedRaces.filter { currentTime > TimeInterval($0.raceStart)}
             let upcomingRaces = sortedRaces.filter { currentTime <= TimeInterval($0.raceStart)}
-            startedRaces.append(contentsOf: upcomingRaces.prefix(5))
+            startedRaces.append(contentsOf: upcomingRaces.prefix(Constants.minimumRaces))
             return startedRaces
         }
         // Update the displayed list only if there's a change
@@ -108,7 +108,7 @@ final class RacesViewModel {
     private func cleanupExpiredRaces() {
         let currentTime = Date().timeIntervalSince1970
         objects.removeAll { race in
-            let expirationTime = TimeInterval(race.raceStart) + 60
+            let expirationTime = TimeInterval(race.raceStart + Constants.racesStartBuffer)
             return currentTime > expirationTime
         }
     }
@@ -128,7 +128,7 @@ final class RacesViewModel {
         // Calculate upcoming races that match current filter
         let filteredUpcomingRaces = applyCategoryFilter(races: upcomingRaces)
         // If fewer than 5 races or fewer than 10 upcoming races, get more
-        if filteredUpcomingRaces.count < 5 || upcomingRaces.count < 10 {
+        if filteredUpcomingRaces.count < 5 || upcomingRaces.count < 50 {
             Task {
                 try await grabData()
             }

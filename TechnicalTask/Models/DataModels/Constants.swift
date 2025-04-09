@@ -6,7 +6,7 @@
 //
 
 struct Constants {
-    static let baseURLString = "https://api.neds.com.au/rest/v1/racing/?method=nextraces&count=20"
+    static let baseURLString = "https://api.neds.com.au/rest/v1/racing/?method=nextraces&count=50"
     static let minimumRaces = 5
     static let racesStartBuffer = 60
 }
