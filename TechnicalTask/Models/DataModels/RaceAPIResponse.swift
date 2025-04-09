@@ -66,4 +66,12 @@ public enum RaceCategory: String, CaseIterable {
         case .harness: return "Harness"
         }
     }
+    
+    var imageName: String {
+        switch self {
+        case .greyhound: "dog"
+        case .horseRacing: "car"
+        case .harness: "figure.seated.seatbelt"
+        }
+    }
 }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MainRaceCard: View {
+    @Environment(\.sizeCategory) var sizeCategory
     let model: RaceSummaryModel
     var timerService: TimerService
     
@@ -18,8 +19,13 @@ struct MainRaceCard: View {
     
     var body: some View {
         HStack {
-            Image(systemName: model.raceIconName)
-            Text(model.raceNameDisplay)
+            if sizeCategory <= .accessibilityExtraExtraLarge {
+                Image(systemName: model.category.imageName)
+                Text(model.raceNameDisplay)
+            }
+            else {
+                Text(model.meetingName)
+            }
             Spacer()
             RaceTimerView(timerService: timerService, raceStartTimestamp: TimeInterval(model.raceStart))
         }
@@ -27,7 +33,7 @@ struct MainRaceCard: View {
         .background{
             RoundedRectangle(cornerRadius: 8)
                 .fill(.clear)
-                .stroke(.secondary, style: .init(lineWidth: 3))
+                .stroke(.secondary, style: .init(lineWidth: 2))
         }
         .padding(.horizontal, 50)
     }

@@ -12,6 +12,8 @@ struct EmptyRacesView : View {
     var body: some View {
         VStack (spacing: 20) {
             Text("There doesn't seem to be any races yet...")
+                .font(.subheadline)
+                .bold()
             
             if !model.errorString.isEmpty {
                 Text(model.errorString)
@@ -23,11 +25,10 @@ struct EmptyRacesView : View {
             Button(action: grabData) {
                 VStack {
                     Image(systemName: "arrow.clockwise")
-                        .resizable()
-                        .frame(width: 75, height: 75)
                     Text("Refresh")
                 }
             }
+            .buttonStyle(.borderedProminent)
         }
     }
     
@@ -36,5 +37,9 @@ struct EmptyRacesView : View {
             try await model.grabData()
         }
     }
+}
+
+#Preview {
+    EmptyRacesView(model: .init())
 }
 
