@@ -9,7 +9,7 @@ import SwiftUI
 // MARK: Filter Bar
 
 struct CategoryFilterBar: View {
-    @ObservedObject var viewModel: RacesViewModel
+    var viewModel: RacesViewModel
     
     var body: some View {
             HStack(alignment: .center, spacing: 10) {

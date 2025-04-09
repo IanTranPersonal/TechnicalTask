@@ -7,24 +7,28 @@
 
 // MARK: Timer
 
-import Foundation
+import SwiftUI
 import Combine
 
-class TimerService: ObservableObject {
-    @Published private(set) var currentTime: Date = Date()
-    private var cancellable: AnyCancellable?
+import Observation
+
+@Observable
+class TimerService {
+    var currentTime: Date = Date()
+    private var timer: Timer?
     
     init() {
         // Update every second
-        cancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] date in
-                self?.currentTime = date
-            }
+        timer = Timer.scheduledTimer(
+            withTimeInterval: 1,
+            repeats: true
+        ) { [weak self] _ in
+            self?.currentTime = Date()
+        }
     }
     
     deinit {
-        cancellable?.cancel()
+        timer?.invalidate()
     }
     
     // Helper method to calculate time remaining for a race

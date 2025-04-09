@@ -8,7 +8,7 @@
 import SwiftUI
 // MARK: EmptyRacesView
 struct EmptyRacesView : View {
-    @ObservedObject var model: RacesViewModel
+    var model: RacesViewModel
     var body: some View {
         VStack (spacing: 20) {
             Text("There doesn't seem to be any races yet...")

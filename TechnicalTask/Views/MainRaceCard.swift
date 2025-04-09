@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainRaceCard: View {
     let model: RaceSummaryModel
-    @ObservedObject var timerService: TimerService
+    var timerService: TimerService
     
     init(model: RaceSummaryModel, timerService: TimerService) {
         self.model = model

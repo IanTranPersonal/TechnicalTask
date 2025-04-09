@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MainView: View {
-    @ObservedObject var model: RacesViewModel
+     var model: RacesViewModel
     
     var body: some View {
         if model.hasItems {

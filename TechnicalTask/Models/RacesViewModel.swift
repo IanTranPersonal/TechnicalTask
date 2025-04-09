@@ -7,21 +7,23 @@
 
 import SwiftUI
 import Combine
+import Observation
 
 @MainActor
-final class RacesViewModel: ObservableObject {
+@Observable
+final class RacesViewModel {
     // MARK: - Published Properties
-    @Published var objects: [RaceSummaryModel] = []
-    @Published var displayedRaces: [RaceSummaryModel] = []
-    @Published var selectedCategory: [RaceCategory] = RaceCategory.allCases
-    @Published var errorString: String = ""
+    var objects: [RaceSummaryModel] = []
+    var displayedRaces: [RaceSummaryModel] = []
+    var selectedCategory: [RaceCategory] = RaceCategory.allCases
+    var errorString: String = ""
     
-    // MARK: - Public properties
+    // MARK: - Public Properties
     var hasItems: Bool { !displayedRaces.isEmpty }
     
     // MARK: - Services
     let timeService = TimerService()
-    
+    let networkService = NetworkService()
     // MARK: - Private Properties
     private var timerCancellable: AnyCancellable?
     
@@ -47,7 +49,7 @@ final class RacesViewModel: ObservableObject {
     
     func grabData() async throws {
         do {
-            let races = try await fetchRaces()
+            let races = try await networkService.fetchRaces()
             // Merge new races with existing ones, avoiding duplicates
             let existingRaceIDs = Set(objects.map { $0.raceID })
             let uniqueNewRaces = races.filter { !existingRaceIDs.contains($0.raceID) }
@@ -63,7 +65,9 @@ final class RacesViewModel: ObservableObject {
     
     // MARK: - Private Methods
     private func setupRaceChecking() {
-        timerCancellable = timeService.$currentTime
+        // Use Timer directly instead of trying to observe currentTime
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
             .sink { [weak self] _ in
                 self?.updateDisplayedRaces()
             }
@@ -128,31 +132,6 @@ final class RacesViewModel: ObservableObject {
             Task {
                 try await grabData()
             }
-        }
-    }
-    private func fetchRaces() async throws -> [RaceSummaryModel] {
-        guard let url = URL(string: Constants.baseURLString) else {
-            throw URLError(.badURL)
-        }
-        let (data, response) = try await URLSession.shared.data(from: url)
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-        let decoder = JSONDecoder()
-        guard let apiResponse = try? decoder.decode(RaceAPIResponse.self, from: data) else {
-            throw URLError(.cannotDecodeContentData)
-        }
-        let raceSummaries = apiResponse.data.raceSummaries.values
-        return raceSummaries.compactMap {
-            RaceSummaryModel(
-                raceID: $0.raceId,
-                raceName: $0.raceName,
-                meetingName: $0.meetingName,
-                raceNumber: $0.raceNumber,
-                raceStart: Int($0.advertisedStart.seconds),
-                category: RaceCategory(rawValue: $0.categoryId) ?? .horseRacing
-            )
         }
     }
 }

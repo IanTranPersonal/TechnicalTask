@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "2F01EAEA-7F65-42D3-A942-AC14CE14266B",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:TechnicalTask.xcodeproj",
+        "identifier" : "BDE2FC3C2DA4B0B8005EB7B7",
+        "name" : "TechnicalTaskTests"
+      }
+    }
+  ],
+  "version" : 1
+}

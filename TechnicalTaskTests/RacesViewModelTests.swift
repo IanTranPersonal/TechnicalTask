@@ -18,7 +18,7 @@ struct RacesViewModelTests {
         let vm = await RacesViewModel()
         await #expect(vm.objects.isEmpty)
         await #expect(vm.displayedRaces.isEmpty)
-        await #expect(vm.selectedCategory == nil)
+        await #expect(vm.selectedCategory == RaceCategory.allCases)
         await #expect(vm.errorString.isEmpty)
     }
     
@@ -85,12 +85,12 @@ struct RacesViewModelTests {
         #expect(await vm.displayedRaces.count == 2)
 
         // Test horse racing filter
-        await vm.setFilter(category: .horseRacing)
+        await vm.setFilter(category: [.horseRacing])
         #expect(await vm.displayedRaces.count == 1)
         #expect(await vm.displayedRaces.first?.category == .horseRacing)
 
         // Test greyhound filter
-        await vm.setFilter(category: .greyhound)
+        await vm.setFilter(category: [.greyhound])
         #expect(await vm.displayedRaces.count == 1)
         #expect(await vm.displayedRaces.first?.category == .greyhound)
     }

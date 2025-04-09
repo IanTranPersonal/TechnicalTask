@@ -8,7 +8,7 @@
 import SwiftUI
 // MARK: Timer view
 struct RaceTimerView: View {
-    @ObservedObject var timerService: TimerService
+    var timerService: TimerService
     let raceStartTimestamp: TimeInterval
     
     var body: some View {
