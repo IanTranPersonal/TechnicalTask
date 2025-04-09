@@ -135,14 +135,3 @@ final class RacesViewModel {
     }
 }
 
-
-extension String {
-    public var localized: String {
-        localized(with: [])
-    }
-    
-    public func localized(with arguments: any CVarArg...) -> String {
-        let format = NSLocalizedString(self, comment: "")
-        return .localizedStringWithFormat(format, arguments)
-    }
-}
