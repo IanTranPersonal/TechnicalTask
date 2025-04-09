@@ -23,31 +23,10 @@ However for the moment, we're ingesting 50 results instead of the 10 from the en
 ## Technology Stack
 
 - **UI Framework**: SwiftUI
-- **Reactive Programming**: Combine
 - **Architecture**: MVVM (Model-View-ViewModel)
-- **Networking**: URLSession with Combine publishers
 - **Testing**: XCTest and Swift Testing
 - **Minimum iOS Version**: iOS 17+
 - **Swift Version**: Swift 5.5+
-
-## Project Structure
-
-```
-RaceApp/
-├── App/                        # App entry point and main configuration
-├── Models/                     # Data models for races and related entities
-├── Views/                      # SwiftUI views
-│   ├── RaceList/               # Race listing views
-│   ├── RaceDetail/             # Race detail views
-│   └── Components/             # Reusable UI components
-├── ViewModels/                 # ViewModels for respective views
-├── Services/                   # API and data services
-│   ├── NetworkService/         # Networking layer
-│   └── TimerService/           # Improved timer handling
-
-Tests/
-├── UnitTests/                  # Unit tests for individual components
-```
 
 ## Getting Started
 
