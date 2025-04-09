@@ -2,13 +2,13 @@
 
 ## Overview
 
-This repository contains a Swift app developed for a technical task, which fetches and displays race data from the Neds API, with filtering capabilities based on start times and race categories.
+This repository contains a Swift app developed for a technical task, which fetches and displays race data from the Neds API, with filtering for race categories.
 
 ## Additional Notes + Considerations
 - Whilst the endpoint given is limited to 10 results, the app will ingest 50 when changing the count. This is because;
 - When a specific filter to the type is applied, there may not be enough of a specific type to make up the target(5) number of races - this could be rectified with the endpoint allowing additional filters
 such as the (i'm assuming) live endpoint documentation [here](https://nedscode.github.io/affiliate-feeds/#racing-meetings) which allows getting more by type.
-Whilst this would require an update to how the network call works, it would be more beneficial to ensure we are retreiving enough of the given types at any one time to "top up" the list.
+Whilst this would require an update to how the network call works, it would be more beneficial to ensure we are retreiving enough of the given types at any one time to "top up" the list. ie. Fetching 10 of (selected categories) in the checkAndFetchMoreRacesIfNeeded method.
 However for the moment, we're ingesting 50 results instead of the 10 from the endpoint to have a better chance of getting more of the required types of races.
 - Obvious improvements also include getting the correct images for the types of races; however the stand in for now is system images.
 
@@ -22,9 +22,9 @@ However for the moment, we're ingesting 50 results instead of the 10 from the en
 
 ## Technology Stack
 
-- **UI Framework**: SwiftUI
+- **Framework**: SwiftUI, Combine, Observation
 - **Architecture**: MVVM (Model-View-ViewModel)
-- **Testing**: XCTest and Swift Testing
+- **Testing**: Swift Testing
 - **Minimum iOS Version**: iOS 17+
 - **Swift Version**: Swift 5.5+
 
@@ -78,7 +78,7 @@ The app follows the MVVM (Model-View-ViewModel) architecture pattern:
 
 1. The app fetches race data from the API using the `NetworkService`
 2. Data is transformed and processed in the ViewModels
-3. SwiftUI views observe the ViewModels for changes
+3. Views observe the ViewModels for changes
 4. Users can filter races based on category
 
 
