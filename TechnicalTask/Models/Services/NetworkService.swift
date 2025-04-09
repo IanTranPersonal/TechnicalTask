@@ -34,7 +34,7 @@ class NetworkService {
                     meetingName: $0.meetingName,
                     raceNumber: $0.raceNumber,
                     raceStart: Int($0.advertisedStart.seconds),
-                    category: RaceCategory(rawValue: $0.categoryId) ?? .horseRacing
+                    category: RaceCategory(rawValue: $0.categoryId) ?? .horseRacing // Only in the event a different category ID is passed
                 )
             }
         } catch {
