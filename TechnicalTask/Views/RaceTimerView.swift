@@ -25,14 +25,12 @@ struct RaceTimerView: View {
         if timeRemaining <= -59 {
             return "Underway"
         }
-        
         let minutes = Int(timeRemaining) / Constants.racesStartBuffer
         let seconds = Int(timeRemaining) % Constants.racesStartBuffer
         if minutes <= 0 {
             return "\(seconds)s"
         }
         return "\(minutes)m \(seconds)s"
-        
     }
     
     private var timeRemainingColor: Color {

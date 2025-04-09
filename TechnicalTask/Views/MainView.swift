@@ -17,6 +17,7 @@ struct MainView: View {
                 ScrollView {
                     ForEach(model.displayedRaces, id: \.self) { race in
                         MainRaceCard(model: race, timerService: model.timeService)
+                            .accessibilityLabel(Text("Race: \(race.raceNameDisplay)"))
                     }
                 }
                 .refreshable {

@@ -27,6 +27,8 @@ struct CategoryFilterBar: View {
                         
                     }
                 )
+                .accessibilityLabel(Text("Filter button for \(category.displayName)"))
+                .accessibility(addTraits: [.isButton])
             }
         }
         .padding(.vertical, 8)
