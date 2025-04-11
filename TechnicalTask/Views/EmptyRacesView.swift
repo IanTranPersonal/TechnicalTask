@@ -11,7 +11,7 @@ struct EmptyRacesView : View {
     var model: RacesViewModel
     var body: some View {
         VStack (spacing: 20) {
-            Text("There doesn't seem to be any races yet...")
+            Text("emptyTextTitle".localized)
                 .font(.subheadline)
                 .bold()
             
@@ -25,7 +25,7 @@ struct EmptyRacesView : View {
             Button(action: grabData) {
                 VStack {
                     Image(systemName: "arrow.clockwise")
-                    Text("Refresh")
+                    Text("refreshButtonTitle".localized)
                 }
             }
             .buttonStyle(.borderedProminent)

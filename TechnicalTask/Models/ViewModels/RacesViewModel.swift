@@ -24,12 +24,16 @@ class RacesViewModel {
     let timeService = TimerService()
     
     
-    var raceCheckingTask: Task<Void, Never>?
+   private var raceCheckingTask: Task<Void, Never>?
     
     init() {
         setupRaceChecking()
-        Task {
-            try await grabData()
+        Task { try await grabData() }
+    }
+    
+    deinit {
+        Task { @MainActor [weak self] in
+            self?.raceCheckingTask?.cancel()
         }
     }
     
@@ -62,20 +66,12 @@ class RacesViewModel {
         }
     }
     
-    private func cleanUp() {
-        raceCheckingTask?.cancel()
-    }
-    
     // MARK: - Private Methods
     private func setupRaceChecking() {
         raceCheckingTask = Task { [weak self] in
-            do {
-                while !Task.isCancelled {
-                    self?.updateDisplayedRaces()
-                    try await Task.sleep(for: .seconds(1))
-                }
-            } catch {
-                self?.cleanUp()
+            while !Task.isCancelled {
+                self?.updateDisplayedRaces()
+                try? await Task.sleep(for: .seconds(1))
             }
         }
     }
@@ -171,6 +167,11 @@ class RacesViewModel {
             errorString = "Error fetching races: \n\(error.localizedDescription)"
             throw error
         }
+    }
+    
+    private func cleanUp() {
+        raceCheckingTask?.cancel()
+        raceCheckingTask = nil
     }
 }
 

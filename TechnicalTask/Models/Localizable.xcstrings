@@ -12,6 +12,17 @@
         }
       }
     },
+    "emptyTextTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There doesn't seem to be any races yet..."
+          }
+        }
+      }
+    },
     "errorMessage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -65,11 +76,16 @@
         }
       }
     },
-    "Refresh" : {
-
-    },
-    "There doesn't seem to be any races yet..." : {
-
+    "refreshButtonTitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

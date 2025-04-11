@@ -143,7 +143,6 @@ class MockRacesViewModel: RacesViewModel {
     // Setup and immediately cancel timer checking.
     override init() {
         super.init()
-        raceCheckingTask?.cancel()
     }
     
     override func grabData() async throws {} // Making sure we don't call out for actual data
