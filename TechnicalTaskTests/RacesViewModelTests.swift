@@ -91,18 +91,7 @@ struct RacesViewModelTests {
     @Test("Test Expired Races Cleanup")
     func testExpiredRaceCleanup() async throws {
         let vm = MockRacesViewModel()
-        
-        // Create an expired race that has started for more than 60s
-        let expiredRace = RaceSummaryModel(
-            raceID: "1",
-            raceName: "Expired Race",
-            meetingName: "Meeting 1",
-            raceNumber: 1,
-            raceStart: Int(Date().timeIntervalSince1970 - 200),
-            category: .horseRacing
-        )
-        
-        let testRaceData = [expiredRace, RaceViewModelHelpers.firstUpcomingRace]
+        let testRaceData = [RaceViewModelHelpers.expiredRace, RaceViewModelHelpers.firstUpcomingRace]
         
         // Add both races
         vm.updateRaceData(races: testRaceData)
@@ -156,6 +145,15 @@ class MockRacesViewModel: RacesViewModel {
 
 // MARK: - Test Helpers
 struct RaceViewModelHelpers {
+    static let expiredRace = RaceSummaryModel(
+        raceID: "9999",
+        raceName: "Expired Race",
+        meetingName: "Meeting 1",
+        raceNumber: 1,
+        raceStart: Int(Date().timeIntervalSince1970 - 200),
+        category: .horseRacing
+    )
+    
     static let recentlyStartedRace = RaceSummaryModel(
         raceID: "1",
         raceName: "Recently Started Race",
