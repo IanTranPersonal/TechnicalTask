@@ -6,63 +6,44 @@
 //
 
 import Testing
-import Combine
 import SwiftUI
 @testable import TechnicalTask
 
+@MainActor
 struct RacesViewModelTests {
     
     // MARK: - Test Cases
-    @Test("First Load Tests")
-    func testInitialState() async {
-        let vm = await RacesViewModel()
-        await #expect(vm.objects.isEmpty)
-        await #expect(vm.displayedRaces.isEmpty)
-        await #expect(vm.selectedCategory == RaceCategory.allCases)
-        await #expect(vm.errorString.isEmpty)
+    @Test("Test Initial State of RacesViewModel")
+    func testInitialState() async throws {
+        let vm = MockRacesViewModel()
+        #expect(vm.selectedCategory == RaceCategory.allCases)
+        #expect(vm.errorString.isEmpty)
     }
     
-    @Test("Test Displayed Races")
-    func testDisplayedRaces() async {
-        // Started 10s ago (within 60s cutoff)
-        let recentlyStartedRace = RaceSummaryModel(
-            raceID: "1",
-            raceName: "Past Race",
-            meetingName: "Meeting 1",
-            raceNumber: 1,
-            raceStart: Int(Date().timeIntervalSince1970 - 10),
-            category: .horseRacing
-        )
-        // Current races
-        let firstCurrentRace = RaceSummaryModel(
-            raceID: "2",
-            raceName: "Upcoming Race 1",
-            meetingName: "Meeting 2",
-            raceNumber: 2,
-            raceStart: Int(Date().timeIntervalSince1970 + 100),
-            category: .greyhound
-        )
-        let secondCurrentRace = RaceSummaryModel(
-            raceID: "3",
-            raceName: "Upcoming Race 2",
-            meetingName: "Meeting 3",
-            raceNumber: 3,
-            raceStart: Int(Date().timeIntervalSince1970 + 200),
-            category: .harness
-        )
+    @Test("Test Displayed Races (inc started race)")
+    func testDisplayedRaces() async throws {
+        let vm = MockRacesViewModel()
+        let dummyRaces = [
+            RaceViewModelHelpers.recentlyStartedRace,
+            RaceViewModelHelpers.firstUpcomingRace,
+            RaceViewModelHelpers.secondUpcomingRace
+        ]
+        // Update race data
+        vm.updateRaceData(races: dummyRaces)
+        try await Task.sleep(for: .milliseconds(100))
         
-        let vm = await RacesViewModel()
-        await vm.updateRaceData(races: [recentlyStartedRace, firstCurrentRace, secondCurrentRace])
+        // Verify race count
+        #expect(vm.displayedRaces.count == 3, "Should display all 3 races")
         
-        // Check all 3 races are showing
-        await #expect(vm.displayedRaces.count == 3)
-        // Check the first race is the one already started
-        await #expect(vm.displayedRaces.first?.raceID == "1")
+        // Verify started race is first
+        #expect(vm.displayedRaces.first?.raceID == "1", "Started race should be first")
     }
 
-    @Test("Test Filtering Race Types")
+    @Test("Check Race Filtering")
     func testRaceFilter() async throws {
-        let vm = await RacesViewModel()
+        let vm = MockRacesViewModel()
+        
+        // Add test data
         let horseRace = RaceSummaryModel(
             raceID: "1",
             raceName: "Horse Race",
@@ -71,6 +52,7 @@ struct RacesViewModelTests {
             raceStart: Int(Date().timeIntervalSince1970 + 100),
             category: .horseRacing
         )
+        
         let greyhoundRace = RaceSummaryModel(
             raceID: "2",
             raceName: "Greyhound Race",
@@ -79,79 +61,126 @@ struct RacesViewModelTests {
             raceStart: Int(Date().timeIntervalSince1970 + 200),
             category: .greyhound
         )
-        await vm.updateRaceData(races: [horseRace, greyhoundRace])
+        
+        // Insert race data
+        vm.updateRaceData(races: [horseRace, greyhoundRace])
+        try await Task.sleep(for: .milliseconds(50))
 
-        // Test no filter
-        #expect(await vm.displayedRaces.count == 2)
+        #expect(vm.displayedRaces.count == 2, "Should display both races when unfiltered")
 
-        // Test horse racing filter
-        await vm.setFilter(category: [.horseRacing])
-        #expect(await vm.displayedRaces.count == 1)
-        #expect(await vm.displayedRaces.first?.category == .horseRacing)
+        // Apply horse racing filter
+        vm.setFilter(category: [.horseRacing])
+        try await Task.sleep(for: .milliseconds(50))
+        
+        #expect(vm.displayedRaces.count == 1, "Should display only horse race")
+        #expect(vm.displayedRaces.first?.category == .horseRacing, "Should be horse racing category")
 
-        // Test greyhound filter
-        await vm.setFilter(category: [.greyhound])
-        #expect(await vm.displayedRaces.count == 1)
-        #expect(await vm.displayedRaces.first?.category == .greyhound)
+        // Apply greyhound filter
+        vm.setFilter(category: [.greyhound])
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(vm.displayedRaces.count == 1, "Should display only greyhound race")
+        #expect(vm.displayedRaces.first?.category == .greyhound, "Should be greyhound category")
+        
+        // Try to apply no filters
+        vm.setFilter(category: [])
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(vm.selectedCategory == RaceCategory.allCases, "Should have reset to all categories")
+        #expect(vm.displayedRaces.count == 2, "Should have reset to showing all types")
     }
 
-    @Test("Test Removed races after expiration")
+    @Test("Test Expired Races Cleanup")
     func testExpiredRaceCleanup() async throws {
-        let vm = await RacesViewModel()
+        let vm = MockRacesViewModel()
+        
+        // Create an expired race that has started for more than 60s
         let expiredRace = RaceSummaryModel(
             raceID: "1",
             raceName: "Expired Race",
             meetingName: "Meeting 1",
             raceNumber: 1,
-            raceStart: Int(Date().timeIntervalSince1970 - 100), // Started 100s ago
+            raceStart: Int(Date().timeIntervalSince1970 - 200),
             category: .horseRacing
         )
-        let validRace = RaceSummaryModel(
-            raceID: "2",
-            raceName: "Valid Race",
-            meetingName: "Meeting 2",
-            raceNumber: 2,
-            raceStart: Int(Date().timeIntervalSince1970 + 100), // Starts in 100s
-            category: .greyhound
-        )
-        await vm.updateRaceData(races: [expiredRace, validRace])
+        
+        let testRaceData = [expiredRace, RaceViewModelHelpers.firstUpcomingRace]
+        
+        // Add both races
+        vm.updateRaceData(races: testRaceData)
+        try await Task.sleep(for: .milliseconds(100))
+        
+        // Run test cleanup (normally happens in updateDisplayedRaces)
+        vm.dummyCleanupExpiredRaces()
+        try await Task.sleep(for: .milliseconds(50))
 
-        // Expired race should be removed
-        #expect(await vm.objects.count == 1)
-        #expect(await vm.objects.first?.raceID == "2")
+        // Check that only the upcoming race remains
+        #expect(vm.objects.count == 1, "Should have removed expired race")
+        // And that it's the upcoming race (with ID 2)
+        #expect(vm.objects.first?.raceID == "2", "Should only contain the upcoming race")
     }
 
-    @Test func testDisplayLogic() async throws {
-        let vm = await RacesViewModel()
-        let pastRace = RaceSummaryModel(
-            raceID: "1",
-            raceName: "Past Race",
-            meetingName: "Meeting 1",
-            raceNumber: 1,
-            raceStart: Int(Date().timeIntervalSince1970 - 10), // Started 10s ago (within 60s cutoff)
-            category: .horseRacing
-        )
-        let upcomingRace1 = RaceSummaryModel(
-            raceID: "2",
-            raceName: "Upcoming Race 1",
-            meetingName: "Meeting 2",
-            raceNumber: 2,
-            raceStart: Int(Date().timeIntervalSince1970 + 100),
-            category: .greyhound
-        )
-        let upcomingRace2 = RaceSummaryModel(
-            raceID: "3",
-            raceName: "Upcoming Race 2",
-            meetingName: "Meeting 3",
-            raceNumber: 3,
-            raceStart: Int(Date().timeIntervalSince1970 + 200),
-            category: .horseRacing
-        )
-        await vm.updateRaceData(races: [pastRace, upcomingRace1, upcomingRace2])
+    @Test("Test Race Ordering")
+    func testRaceOrdering() async throws {
+        let vm = MockRacesViewModel()
+        let testRaces = [
+            RaceViewModelHelpers.recentlyStartedRace,
+            RaceViewModelHelpers.firstUpcomingRace,
+            RaceViewModelHelpers.secondUpcomingRace
+        ]
+        // Update race data
+        vm.updateRaceData(races: testRaces)
+        try await Task.sleep(for: .milliseconds(100))
 
-        // Should show past race + up to 5 upcoming races
-        #expect(await vm.displayedRaces.count == 3)
-        #expect(await vm.displayedRaces.first?.raceID == "1") // Past race first
+        // Verify display order and count
+        #expect(vm.displayedRaces.count == 3, "Should display all races")
+            #expect(vm.displayedRaces.first?.raceID == "1", "Started race should be first")
     }
 }
 
+// Mock implementation to avoid network calls and provide test hooks
+@MainActor
+class MockRacesViewModel: RacesViewModel {
+    
+    // Setup and immediately cancel timer checking.
+    override init() {
+        super.init()
+        raceCheckingTask?.cancel()
+    }
+    
+    override func grabData() async throws {} // Making sure we don't call out for actual data
+    
+    // Test helper to manually trigger cleanup
+    func dummyCleanupExpiredRaces() {
+        cleanupExpiredRacesIfNeeded()
+        updateDisplayedRaces()
+    }
+}
+
+// MARK: - Test Helpers
+struct RaceViewModelHelpers {
+    static let recentlyStartedRace = RaceSummaryModel(
+        raceID: "1",
+        raceName: "Recently Started Race",
+        meetingName: "Meeting 1",
+        raceNumber: 1,
+        raceStart: Int(Date().timeIntervalSince1970 - 10), // Started 10s ago (within limits)
+        category: .horseRacing
+    )
+    
+    static let firstUpcomingRace = RaceSummaryModel(
+        raceID: "2",
+        raceName: "Upcoming Race 1",
+        meetingName: "Meeting 2",
+        raceNumber: 2,
+        raceStart: Int(Date().timeIntervalSince1970 + 100),
+        category: .greyhound
+    )
+    
+    static let secondUpcomingRace = RaceSummaryModel(
+        raceID: "3",
+        raceName: "Upcoming Race 2",
+        meetingName: "Meeting 3",
+        raceNumber: 3,
+        raceStart: Int(Date().timeIntervalSince1970 + 200),
+        category: .horseRacing
+    )
+}

@@ -7,7 +7,7 @@
 
 import Testing
 import SwiftUI
-import Combine
+
 @testable import TechnicalTask
 
 struct RaceSummaryModelTests {

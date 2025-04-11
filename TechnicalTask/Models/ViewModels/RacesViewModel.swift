@@ -6,12 +6,11 @@
 //
 
 import SwiftUI
-import Combine
 import Observation
 
 @MainActor
 @Observable
-final class RacesViewModel {
+class RacesViewModel {
     // MARK: - Published Properties
     var objects: [RaceSummaryModel] = []
     var displayedRaces: [RaceSummaryModel] = []
@@ -23,9 +22,9 @@ final class RacesViewModel {
     
     // MARK: - Services
     let timeService = TimerService()
-    let networkService = NetworkService()
-    // MARK: - Private Properties
-    private var timerCancellable: AnyCancellable?
+    
+    
+    var raceCheckingTask: Task<Void, Never>?
     
     init() {
         setupRaceChecking()
@@ -49,7 +48,7 @@ final class RacesViewModel {
     
     func grabData() async throws {
         do {
-            let races = try await networkService.fetchRaces()
+            let races = try await fetchRaces()
             // Merge new races with existing ones, avoiding duplicates
             let existingRaceIDs = Set(objects.map { $0.raceID })
             let uniqueNewRaces = races.filter { !existingRaceIDs.contains($0.raceID) }
@@ -63,16 +62,25 @@ final class RacesViewModel {
         }
     }
     
-    // MARK: - Private Methods
-    private func setupRaceChecking() {
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.updateDisplayedRaces()
-            }
+    private func cleanUp() {
+        raceCheckingTask?.cancel()
     }
     
-    private func updateDisplayedRaces() {
+    // MARK: - Private Methods
+    private func setupRaceChecking() {
+        raceCheckingTask = Task { [weak self] in
+            do {
+                while !Task.isCancelled {
+                    self?.updateDisplayedRaces()
+                    try await Task.sleep(for: .seconds(1))
+                }
+            } catch {
+                self?.cleanUp()
+            }
+        }
+    }
+    
+    func updateDisplayedRaces() {
         let currentTime = Date().timeIntervalSince1970
         cleanupExpiredRacesIfNeeded()
         // Get races that haven't passed the 60-second cutoff
@@ -103,7 +111,7 @@ final class RacesViewModel {
         checkAndFetchMoreRacesIfNeeded(availableRaces: availableRaces)
     }
     
-    private func cleanupExpiredRacesIfNeeded() {
+    func cleanupExpiredRacesIfNeeded() {
         let currentTime = Date().timeIntervalSince1970
         // Clean up expired races past started 60s
         objects.removeAll { race in
@@ -131,6 +139,37 @@ final class RacesViewModel {
             Task {
                 try await grabData()
             }
+        }
+    }
+    
+    private func fetchRaces() async throws -> [RaceSummaryModel] {
+        do {
+            guard let url = URL(string: Constants.baseURLString) else {
+                throw URLError(.badURL)
+            }
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                throw URLError(.badServerResponse)
+            }
+            let decoder = JSONDecoder()
+            guard let apiResponse = try? decoder.decode(RaceAPIResponse.self, from: data) else {
+                throw URLError(.cannotDecodeContentData)
+            }
+            let raceSummaries = apiResponse.data.raceSummaries.values
+            return raceSummaries.compactMap {
+                RaceSummaryModel(
+                    raceID: $0.raceId,
+                    raceName: $0.raceName,
+                    meetingName: $0.meetingName,
+                    raceNumber: $0.raceNumber,
+                    raceStart: Int($0.advertisedStart.seconds),
+                    category: RaceCategory(rawValue: $0.categoryId) ?? .horseRacing // Only in the event a different category ID is passed
+                )
+            }
+        } catch {
+            errorString = "Error fetching races: \n\(error.localizedDescription)"
+            throw error
         }
     }
 }

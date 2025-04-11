@@ -23,6 +23,12 @@
         }
       }
     },
+    "Filter button for %@" : {
+
+    },
+    "Hello, world!" : {
+
+    },
     "meetingName" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -33,6 +39,9 @@
           }
         }
       }
+    },
+    "Race: %@" : {
+
     },
     "raceNameDisplay" : {
       "extractionState" : "manual",
@@ -55,6 +64,12 @@
           }
         }
       }
+    },
+    "Refresh" : {
+
+    },
+    "There doesn't seem to be any races yet..." : {
+
     }
   },
   "version" : "1.0"
